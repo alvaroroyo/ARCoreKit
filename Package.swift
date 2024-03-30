@@ -48,7 +48,7 @@ let package = Package(
             name: "ARControls",
             path: "Sources/ARControls"),
         .testTarget(
-            name: "ARControls-Tests",
+            name: "ARControlsTests",
             dependencies: ["ARControls"],
             path: "Tests/ARControls"),
         //ARSnapshotTests
