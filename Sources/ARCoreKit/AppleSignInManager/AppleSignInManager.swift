@@ -29,14 +29,12 @@ public final class AppleSignInManager: NSObject {
 extension AppleSignInManager: ASAuthorizationControllerDelegate {
     public enum AppleSignInManagerError: Error {
         case notAppleIDCredential
-        case notNonce
         case appleIdToken
         case tokenString
         
         public var localizedDescription: String {
             switch self {
             case .notAppleIDCredential: return "Error converting ASAuthorization to ASAuthorizationAppleIDCredential"
-            case .notNonce: return "Nonce value is nil"
             case .appleIdToken: return "Error getting appleIdToken"
             case .tokenString: return "Error converting token to string"
             }
@@ -50,11 +48,6 @@ extension AppleSignInManager: ASAuthorizationControllerDelegate {
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         guard let appleIdCredential = authorization.credential as? ASAuthorizationAppleIDCredential else {
             subject.send(completion: .failure(AppleSignInManagerError.notAppleIDCredential))
-            return
-        }
-        
-        guard let nonce = self.nonce else {
-            subject.send(completion: .failure(AppleSignInManagerError.notNonce))
             return
         }
         
