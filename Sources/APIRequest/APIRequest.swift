@@ -9,8 +9,6 @@ public enum APIMethod: String {
 public protocol APIRequest: AnyObject {
     associatedtype Response: Codable
 
-    typealias APIRequestResponse = Result<Response, APIError>
-
     var method: APIMethod { get }
     var baseURL: String { get }
     var path: String { get }
