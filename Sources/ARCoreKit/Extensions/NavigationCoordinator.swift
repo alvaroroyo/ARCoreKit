@@ -4,7 +4,10 @@
 
 import SwiftUI
 
-public struct NavigationCoordinator<Path: Hashable, Content: View>: View {
+public typealias CoordinatorDismiss = () -> Void
+public typealias Pathable = Hashable & Identifiable
+
+public struct NavigationCoordinator<Path: Pathable, Content: View>: View {
     @ObservedObject var coordinator: Coordinator<Path>
     private var content: (Path) -> Content
     
@@ -24,12 +27,22 @@ public struct NavigationCoordinator<Path: Hashable, Content: View>: View {
                 }
         }
         .environmentObject(coordinator)
+        .fullScreenCover(item: $coordinator.fullScreen, onDismiss: coordinator.onDismiss) { fullScreen in
+            content(fullScreen)
+        }
+        .sheet(item: $coordinator.sheet, onDismiss: coordinator.onDismiss) { sheet in
+            content(sheet)
+        }
     }
 }
 
-open class Coordinator<Path: Hashable>: ObservableObject {
+open class Coordinator<Path: Pathable>: ObservableObject {
     @Published private(set) var root: Path
     @Published var path: NavigationPath = .init()
+    @Published var fullScreen: Path?
+    @Published var sheet: Path?
+    
+    private var onDismissCompletion: CoordinatorDismiss?
     
     public init(root: Path) {
         self.root = root
@@ -40,10 +53,34 @@ open class Coordinator<Path: Hashable>: ObservableObject {
     }
     
     open func pop() {
+        guard path.count > 0 else { return }
         path.removeLast()
     }
     
     open func popToRoot() {
         path = .init()
+    }
+    
+    open func show(sheet: Path) {
+        self.sheet = sheet
+    }
+    
+    open func show(fullScreen: Path) {
+        self.fullScreen = fullScreen
+    }
+    
+    open func dismiss(completion: CoordinatorDismiss?) {
+        guard sheet != nil || fullScreen != nil else {
+            completion?()
+            return
+        }
+        self.onDismissCompletion = completion
+        sheet = nil
+        fullScreen = nil
+    }
+    
+    open func onDismiss() {
+        self.onDismissCompletion?()
+        self.onDismissCompletion = nil
     }
 }
