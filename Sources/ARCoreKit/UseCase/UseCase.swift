@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 public protocol UseCase<Input, Output> {
     associatedtype Input
     associatedtype Output
