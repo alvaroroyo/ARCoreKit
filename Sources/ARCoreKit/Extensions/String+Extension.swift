@@ -16,4 +16,9 @@ public extension String {
         }
     }
     
+    var valueOrNil: String? {
+        guard !self.isEmpty else { return nil }
+        return self
+    }
+    
 }
