@@ -1,4 +1,5 @@
 import UIKit
+import AVFoundation
 
 public extension UIImage {
     var base64PNG: String? {
@@ -18,31 +19,26 @@ public extension UIImage {
 }
 
 public extension UIImage {
-    private func getGoodSize(_ maxImageSize: CGFloat) -> CGSize? {
-        var size = self.size
-        size.height *= scale
-        size.width *= scale
-        if size.width > size.height, size.width > maxImageSize {
-            let newHeight = maxImageSize * size.height / size.width
-            return CGSize(width: maxImageSize, height: newHeight)
-        } else if size.height > size.width, size.height > maxImageSize {
-            let newWidth = maxImageSize * size.width / size.height
-            return CGSize(width: newWidth, height: maxImageSize)
-        } else if size.height == size.width, size.height > maxImageSize {
-            return CGSize(width: maxImageSize, height: maxImageSize)
-        } else {
-            return nil
-        }
-    }
+    func resize(_ maxSize: CGFloat) -> UIImage {
+            // Keep aspect ratio
+            let maxSize = CGSize(width: maxSize, height: maxSize)
 
-    func resizeWithProportions(_ maxSize: CGFloat = 500) -> UIImage {
-        if let newSize = getGoodSize(maxSize) {
-            UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
-            draw(in: CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height))
-            guard let newImage = UIGraphicsGetImageFromCurrentImageContext() else { return self }
-            UIGraphicsEndImageContext()
-            return newImage
+            let availableRect = AVFoundation.AVMakeRect(
+                aspectRatio: self.size,
+                insideRect: .init(origin: .zero, size: maxSize)
+            )
+            let targetSize = availableRect.size
+
+            // Set scale of renderer so that 1pt == 1px
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 1
+            let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
+
+            // Resize the image
+            let resized = renderer.image { _ in
+                self.draw(in: CGRect(origin: .zero, size: targetSize))
+            }
+
+            return resized
         }
-        return self
-    }
 }
