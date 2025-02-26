@@ -7,10 +7,31 @@ public struct CacheManager {
     public init() {}
     
     public func add(_ data: Data, withKey key: String) {
-        try? data.write(to: cacheUrl.appendingPathComponent(key))
+        do {
+            let key = replaceKey(key)
+            try data.write(to: cacheUrl.appendingPathComponent(key))
+        } catch {
+            print(error.localizedDescription)
+        }
     }
     
     public func getData(withKey key: String) -> Data? {
-        try? Data(contentsOf: cacheUrl.appendingPathComponent(key))
+        do {
+            let key = replaceKey(key)
+            return try Data(contentsOf: cacheUrl.appendingPathComponent(key))
+        } catch {
+            print(error.localizedDescription)
+            return nil
+        }
+    }
+    
+    private func replaceKey(_ key: String) -> String {
+        key.replacingOccurrences(of: "/", with: "")
+            .replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: ".", with: "")
+            .replacingOccurrences(of: "_", with: "")
+        
+        
     }
 }
