@@ -13,3 +13,12 @@ public extension Array where Element: Comparable {
         self.append(element)
     }
 }
+
+public extension Array where Element : Equatable {
+  subscript(safe bounds: Range<Int>) -> Array<Element> {
+    if bounds.lowerBound > count { return [] }
+    let lower = Swift.max(0, bounds.lowerBound)
+    let upper = Swift.max(0, Swift.min(count, bounds.upperBound))
+    return Array(self[lower..<upper])
+  }
+}
